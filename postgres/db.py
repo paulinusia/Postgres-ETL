@@ -1,7 +1,7 @@
 import psycopg2
 import json
 import re
-
+import os
 
 #establish connection
 con = psycopg2.connect(
@@ -137,43 +137,50 @@ def close_connection():
 if __name__ == '__main__':
     row_counter = 0
     
-
-    with open("../data/2010-03", buffering=1000) as f:
-        create_table()
-        for row in f:
-            row = json.loads(row)
-            row_counter += 1
-            
-            #print(row)
-            comment_id = row['name']
-            #print(comment_id)
-            parent_id = row['parent_id']
-            #print(parent_id)
-            link_id = row['link_id']
-            #print(link_id)
-            comment = format_data(row['body'])
-            #print(comment)
-            utc = row['created_utc']
-            #print(utc)
-            score = int(row['score'])
-
-            #print('score type initiated: ', type(score))
-            #print(score)
-            subreddit = filter_subreddit(row['subreddit'])
+    files_path = '../data/'
+    current_file = '2010-05'
 
 
-            if score >= 10 and (subreddit and comment is not None):
+with open('filelist.txt') as filenames:
+    for row in filenames:
+        name = row.replace("\n", "")
+
+        with open(files_path + name, buffering=1000) as f:
+            create_table()
+            for row in f:
+                row = json.loads(row)
+                row_counter += 1
                 
-                    #print(subreddit)
-                try:
-                    check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-                    has_parent_comment = find_parent(parent_id)
-                    if has_parent_comment:
-                        update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-                        #print('reply exists, updating if needed')
-                except Exception as e:
-                    print(str(e))
+                #print(row)
+                comment_id = row['name']
+                #print(comment_id)
+                parent_id = row['parent_id']
+                #print(parent_id)
+                link_id = row['link_id']
+                #print(link_id)
+                comment = format_data(row['body'])
+                #print(comment)
+                utc = row['created_utc']
+                #print(utc)
+                score = int(row['score'])
 
-        close_connection()
+                #print('score type initiated: ', type(score))
+                #print(score)
+                subreddit = filter_subreddit(row['subreddit'])
 
-           
+
+                if score >= 10 and (subreddit and comment is not None):
+                    
+                        #print(subreddit)
+                    try:
+                        check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+                        has_parent_comment = find_parent(parent_id)
+                        if has_parent_comment:
+                            update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+                            #print('reply exists, updating if needed')
+                    except Exception as e:
+                        print(str(e))
+
+            close_connection()
+
+            
