@@ -5,7 +5,7 @@ import re
 
 #establish connection
 con = psycopg2.connect(
-        database= 'db2008',
+        database= 'db2010',
         password= 'password')
 
 c = con.cursor()
@@ -39,10 +39,10 @@ def filter_subreddit(subreddit):
     if ((row['subreddit'] == 'relationships') or (row['subreddit'] == 'Advice')
         or (row['subreddit'] == 'relationshipadvice') or (row['subreddit'] == 'relationship_advice')
         or (row['subreddit'] == 'askwomenadvice') or (row['subreddit'] == 'dating_advice')
-        or (row['subreddit'] == 'AskMen') or (row['subreddit'] == 'AskReddit')
+        or (row['subreddit'] == 'AskMen') 
         or (row['subreddit'] == 'AskWomen') or (row['subreddit'] == 'getdisciplined')
         or (row['subreddit'] == 'Parenting') or (row['subreddit'] == 'Divorce')
-        or (row['subreddit'] == 'news') or (row['subreddit'] == 'mentalhealth')
+       or (row['subreddit'] == 'mentalhealth')
         or (row['subreddit'] == 'Anxiety') or (row['subreddit'] == 'depression')
         or (row['subreddit'] == 'ADHD') or (row['subreddit'] == 'offmychest')
         or (row['subreddit'] == 'confessions') or (row['subreddit'] == 'rant')
@@ -50,8 +50,7 @@ def filter_subreddit(subreddit):
         or (row['subreddit'] == 'NoStupidQuestions') or (row['subreddit'] == 'TrollXChromosomes')
         or (row['subreddit'] == 'TrollXSupport') or (row['subreddit'] == 'breakingmom')
         or (row['subreddit'] == 'TwoXChromosomes') or (row['subreddit'] == 'CatFacts')
-        or (row['subreddit'] == 'thebestoflegaladvice') or (row['subreddit'] == 'getmotivated') or 
-        (row['subreddit'] == 'IAmA')):
+        or (row['subreddit'] == 'thebestoflegaladvice') or (row['subreddit'] == 'getmotivated')):
         return subreddit
     else:
         pass
@@ -139,7 +138,7 @@ if __name__ == '__main__':
     row_counter = 0
     
 
-    with open("../data/2008-12", buffering=1000) as f:
+    with open("../data/2010-03", buffering=1000) as f:
         create_table()
         for row in f:
             row = json.loads(row)
@@ -163,7 +162,7 @@ if __name__ == '__main__':
             subreddit = filter_subreddit(row['subreddit'])
 
 
-            if score >= 2 and (subreddit and comment is not None):
+            if score >= 10 and (subreddit and comment is not None):
                 
                     #print(subreddit)
                 try:
