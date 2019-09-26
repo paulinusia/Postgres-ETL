@@ -94,6 +94,10 @@ def update_score(reply_score, score):
 
 
 def check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score):
+            if parent_id == link_id:
+                print(('{} is the root comment').format(comment_id))
+                insert_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+            '''
             query = "SELECT link_id FROM initial_comment WHERE link_id = '{}' LIMIT 1".format(link_id)
             c.execute(query)
             result = c.fetchone()
@@ -103,7 +107,8 @@ def check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, sco
             if result == result2:
                 print(('{} is the root comment').format(comment_id))
                 insert_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-            if result != result2: 
+            '''
+            if parent_id != link_id: 
                 print(('inserting {} into replies').format(comment_id))
                 query3 = """INSERT INTO replies(comment_id, parent_id, link_id, comment, subreddit, utc, score) VALUES ('{}','{}', '{}', '{}','{}',{},{});""".format(comment_id, parent_id, link_id, comment, subreddit, utc, score)
                 c.execute(query3)
@@ -134,7 +139,7 @@ if __name__ == '__main__':
     row_counter = 0
     
 
-    with open("../data/2008-02", buffering=1000) as f:
+    with open("../data/2008-03", buffering=1000) as f:
         create_table()
         for row in f:
             row = json.loads(row)
