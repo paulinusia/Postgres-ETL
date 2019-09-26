@@ -74,7 +74,7 @@ def update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
        # print(r)
         if score > r:
             print(('updating {} reply based on score').format(comment_id))
-            query = """UPDATE replies SET comment_id = ?, parent_id = ?, link_id = ?, comment = ?, subreddit = ?, unix = ?, score = ? WHERE comment_id =?;""".format(
+            query = """UPDATE replies SET comment_id = '{}', parent_id = '{}', link_id = '{}', comment = '{}', subreddit = '{}', utc = '{}', score = '{}' WHERE comment_id = '{}'""".format(
                 comment_id, parent_id, link_id, comment, subreddit, utc, score, comment_id)
             c.execute(query)
             con.commit()
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     row_counter = 0
     
 
-    with open("../data/2008-03", buffering=1000) as f:
+    with open("../data/2008-12", buffering=1000) as f:
         create_table()
         for row in f:
             row = json.loads(row)
