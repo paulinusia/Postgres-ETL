@@ -5,7 +5,7 @@ import os
 
 #establish connection
 con = psycopg2.connect(
-        database= 'db2010',
+        database= 'db2008',
         password= 'password')
 
 c = con.cursor()
@@ -47,10 +47,9 @@ def filter_subreddit(subreddit):
         or (row['subreddit'] == 'ADHD') or (row['subreddit'] == 'offmychest')
         or (row['subreddit'] == 'confessions') or (row['subreddit'] == 'rant')
         or (row['subreddit'] == 'CasualConversation') or (row['subreddit'] == 'confession')
-        or (row['subreddit'] == 'NoStupidQuestions') or (row['subreddit'] == 'TrollXChromosomes')
+        or (row['subreddit'] == 'NoStupidQuestions') 
         or (row['subreddit'] == 'TrollXSupport') or (row['subreddit'] == 'breakingmom')
-        or (row['subreddit'] == 'TwoXChromosomes') or (row['subreddit'] == 'CatFacts')
-        or (row['subreddit'] == 'thebestoflegaladvice') or (row['subreddit'] == 'getmotivated')):
+       or (row['subreddit'] == 'CatFacts') or (row['subreddit'] == 'thebestoflegaladvice') or (row['subreddit'] == 'getmotivated')):
         return subreddit
     else:
         pass
@@ -131,6 +130,16 @@ def find_parent(parent):
     else:
         return False
 
+def find_linked_comment(linkid):
+    query = "SELECT comment_id FROM replies WHERE link_id = '{}' LIMIT 1".format(linkid)
+    c.execute(query)
+    result = c.fetchone()
+    if result is not None:
+        return result[0]
+    else:
+        return False
+
+
 def close_connection():
     con.close();
 
@@ -175,12 +184,18 @@ with open('filelist.txt') as filenames:
                     try:
                         check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
                         has_parent_comment = find_parent(parent_id)
+
+
+                        '''
+                        update reply does not fully work. Comment is not replaced in db, but reply is added to repleis table.
+                        
+                        '''
                         if has_parent_comment:
                             update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
                             #print('reply exists, updating if needed')
                     except Exception as e:
                         print(str(e))
 
-            close_connection()
+            #close_connection()
 
             
