@@ -141,7 +141,27 @@ def find_linked_comment(linkid):
         return result[0]
     else:
         return False
+'''
+TODO:
 
+ADD METHODS
+
+    FILTER EXPLICIT LANGUAGE BY REPLACING CURSE WORDS WITH 'REDACTED'
+    FILTER EXPLICIT SUBJECTS... DISREGARD COMMENT COMPLETELY
+
+
+
+    REMOVE EXCESSIVE SPACING IN COMMENTS
+    REMOVE EXCESSIVE NEW LINE COMMENTS
+    REMOVE SPECIAL CHARACTERS
+    CASE CONVERSIONS
+    REMOVAL OF STOP WORDS
+
+    IMPLEMENT THE NLTK LIBRARY
+
+
+
+'''
 
 def close_connection():
     con.close();
@@ -165,7 +185,14 @@ if __name__ == '__main__':
     FILTER THROUGH FILES/AUTOMATICALLY JUMP FROM FILE TO FILE
 
     AUTOMATICALLY SWITCH DATABASES ONCE FILTERED THROUGH THE FILES... IS THIS AN OPTION
+
+    NOTES
+        COMMENTS LOAD INTO DB WHEN FILES ARE NOT FILTERED THROUGH AND THE CONNECTION IS CLOSED AT THE END
+        
     '''
+    path_name = "../data/"
+
+        
     with open("../data/2010-03", buffering=1000) as f:
         create_table()
         for row in f:
@@ -189,9 +216,9 @@ if __name__ == '__main__':
             #print(score)
             subreddit = filter_subreddit(row['subreddit'])
 
-
-            if score >= 10 and (subreddit and comment is not None):
+            if score >= 10 and (subreddit is not None) and (comment is not None):
                 
+
                     #print(subreddit)
                 try:
                     check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
