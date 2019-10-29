@@ -1,7 +1,7 @@
 import psycopg2
 import json
 import re
-import os
+
 
 
 #establish connection
@@ -52,8 +52,8 @@ def filter_subreddit(subreddit):
         or (row['subreddit'] == 'TrollXSupport') or (row['subreddit'] == 'breakingmom')
        or (row['subreddit'] == 'CatFacts') or (row['subreddit'] == 'thebestoflegaladvice') or (row['subreddit'] == 'getmotivated')):
         
-        #return subreddit
-        print(subreddit)
+        return subreddit
+
     else:
         return None
 
@@ -146,62 +146,72 @@ def find_linked_comment(linkid):
 def close_connection():
     con.close();
 
+
+'''
+TODO:
+
+ADD TO BLACKBOX LOCATION
+
+FIX FILE STRUCTURE
+
+
+'''
 if __name__ == '__main__':
     row_counter = 0
-    
-    files_path = "../data/"
-    current_file = '2010-05'
+
+    '''
+    TODO:
+
+    FILTER THROUGH FILES/AUTOMATICALLY JUMP FROM FILE TO FILE
+
+    AUTOMATICALLY SWITCH DATABASES ONCE FILTERED THROUGH THE FILES... IS THIS AN OPTION
+    '''
+    with open("../data/2010-03", buffering=1000) as f:
+        create_table()
+        for row in f:
+            row = json.loads(row)
+            row_counter += 1
+            
+            #print(row)
+            comment_id = row['name']
+            #print(comment_id)
+            parent_id = row['parent_id']
+            #print(parent_id)
+            link_id = row['link_id']
+            #print(link_id)
+            comment = format_data(row['body'])
+            #print(comment)
+            utc = row['created_utc']
+            #print(utc)
+            score = int(row['score'])
+
+            #print('score type initiated: ', type(score))
+            #print(score)
+            subreddit = filter_subreddit(row['subreddit'])
 
 
-    with open('filelist.txt') as filenames:
-        for row in filenames:
-            name = row.replace("\n", "")
-            #print(name)
-            filed = files_path + name
-
-            with open(filed, buffering=1000) as f:
-                print(filed)
-                create_table()
-                for row in f:
-                    row = json.loads(row)
-                    row_counter += 1
-                    
-                    #print(row)
-                    comment_id = row['name']
-                    #print(comment_id)
-                    parent_id = row['parent_id']
-                    #print(parent_id)
-                    link_id = row['link_id']
-                    #print(link_id)
-                    comment = format_data(row['body'])
-                    #print(comment)
-                    utc = row['created_utc']
-                    #print(utc)
-                    score = int(row['score'])
-
-                    #print('score type initiated: ', type(score))
-                    #print(score)
-                    subreddit = filter_subreddit(row['subreddit'])
-
-               
-                    if subreddit is not None:
-                        
-                        print(subreddit)
-                        try:
-                            check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-                            has_parent_comment = find_parent(parent_id)
-
-
-                            '''
-                            update reply does not fully work. Comment is not replaced in db, but reply is added to repleis table.
-                            
-                            '''
-                            if has_parent_comment:
-                                update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-                                print('reply exists, updating if needed')
-                        except Exception as e:
-                            print(str(e))
-
-    close_connection()
-
+            if score >= 10 and (subreddit and comment is not None):
                 
+                    #print(subreddit)
+                try:
+                    check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+                    has_parent_comment = find_parent(parent_id)
+                    if has_parent_comment:
+
+                        '''
+                        TODO:
+
+                        Fix update/replace comment. Currently adds all replies to DB, does not replace/upate any 
+
+                        COULD BE ISSUE WITH CURRENT REPLY SCORE
+                        WHAT HAPPENS IF SCORES ARE IDENTIAL
+                        ISSUE WITH DB?
+                        '''
+                        update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+                        #print('reply exists, updating if needed')
+                except Exception as e:
+                    print(str(e))
+
+        close_connection()
+
+
