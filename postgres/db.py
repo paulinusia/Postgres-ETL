@@ -60,74 +60,62 @@ def filter_subreddit(subreddit):
         return None
 
 
+def check_if_updated(comment_id, parent_id, link_id, comment, subreddit, utc, score):
+    query = "SELECT link_id FROM replies WHERE link_id = '{}' LIMIT 1".format(link_id)
+    c.execute(query)
+    result = c.fetchone()
+
+    if result != None:
+        update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+    else:
+        print(('inserting {} into replies').format(comment_id))
+        query3 = """INSERT INTO replies(comment_id, parent_id, link_id, comment, subreddit, utc, score) VALUES ('{}','{}', '{}', '{}','{}',{},{});""".format(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+        c.execute(query3)
+        con.commit()
+
 
 def update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score):
     #no linked comments
     query = "SELECT link_id FROM replies WHERE link_id = '{}' LIMIT 1".format(link_id)
-    query2 = "SELECT parent_id FROM replies WHERE parent_id = '{}' LIMIT 1".format(parent_id)
+
     c.execute(query)
     result = c.fetchone()
-    c.execute(query2)
-    result2 = c.fetchone()
+    print(result)
 
-    if result != None and result2 != None:
+
+    if result != None:
         print(('{} has an initial reply already').format(comment_id))
         try: 
             reply_score = "SELECT score FROM replies WHERE link_id = '{}' LIMIT 1 ".format(link_id)
 
             c.execute(reply_score)
             reply_in_db = c.fetchone()
+            reply_in_db = int(reply_in_db[0])
 
-            
-           # r = reply_in_db[0]
+       
 
-
+            if score > reply_in_db:
+                print(('updating {} reply based on score').format(comment_id))
+                query = """UPDATE replies SET comment_id = '{}', parent_id = '{}', link_id = '{}', comment = '{}', subreddit = '{}', utc = '{}', score = '{}' WHERE comment_id = '{}'""".format(comment_id, parent_id, link_id, comment, subreddit, utc, score, comment_id)
+                c.execute(query)
+                con.commit()
+                print('updated successfully')
+         
         except Exception as e:
             raise e
             print('comment could not be updated')
-       # print(type(r))
-       # print(r)
-        if score > reply_in_db:
-            print(('updating {} reply based on score').format(comment_id))
-            query = """UPDATE replies SET comment_id = '{}', parent_id = '{}', link_id = '{}', comment = '{}', subreddit = '{}', utc = '{}', score = '{}' WHERE comment_id = '{}'""".format(
-                comment_id, parent_id, link_id, comment, subreddit, utc, score, comment_id)
-            c.execute(query)
-            con.commit()
-            print('updated successfully')
 
 
-def update_score(reply_score, score):
-    reply_score = int(reply_score)
-    score = int(score)
 
-    if score > reply_score:
-            print(('updating {} reply based on score').format(comment_id))
-            query = """UPDATE replies SET comment_id = ?, parent_id = ?, link_id = ?, comment = ?, subreddit = ?, unix = ?, score = ? WHERE comment_id =?;""".format(comment_id, parent_id, link_id, comment, subreddit, utc, score, comment_id)
-            c.execute(query)
-            con.commit()
-            print('updated successfully')
 
 
 def check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score):
             if parent_id == link_id:
                 print(('{} is the root comment').format(comment_id))
                 insert_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-            '''
-            query = "SELECT link_id FROM initial_comment WHERE link_id = '{}' LIMIT 1".format(link_id)
-            c.execute(query)
-            result = c.fetchone()
-            query2 = "SELECT parent_id FROM initial_comment WHERE parent_id = '{}' LIMIT 1".format(parent_id)
-            c.execute(query2)
-            result2 = c.fetchone()
-            if result == result2:
-                print(('{} is the root comment').format(comment_id))
-                insert_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-            '''
             if parent_id != link_id: 
-                print(('inserting {} into replies').format(comment_id))
-                query3 = """INSERT INTO replies(comment_id, parent_id, link_id, comment, subreddit, utc, score) VALUES ('{}','{}', '{}', '{}','{}',{},{});""".format(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-                c.execute(query3)
-                con.commit()
+                check_if_updated(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+                
 
 
 #helper functions
