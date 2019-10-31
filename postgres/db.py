@@ -1,6 +1,8 @@
 import psycopg2
 import json
 import re
+import os
+
 
 
 
@@ -62,18 +64,30 @@ def filter_subreddit(subreddit):
 def update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score):
     #no linked comments
     query = "SELECT link_id FROM replies WHERE link_id = '{}' LIMIT 1".format(link_id)
+    query2 = "SELECT parent_id FROM replies WHERE parent_id = '{}' LIMIT 1".format(parent_id)
     c.execute(query)
     result = c.fetchone()
-    if result != None:
+    c.execute(query2)
+    result2 = c.fetchone()
+
+    if result != None and result2 != None:
         print(('{} has an initial reply already').format(comment_id))
-        reply_score = "SELECT score FROM replies WHERE link_id = '{}' LIMIT 1 ".format(link_id)
-        c.execute(reply_score)
-        reply = c.fetchone()
-        r = reply[0]
-        
+        try: 
+            reply_score = "SELECT score FROM replies WHERE link_id = '{}' LIMIT 1 ".format(link_id)
+
+            c.execute(reply_score)
+            reply_in_db = c.fetchone()
+
+            
+           # r = reply_in_db[0]
+
+
+        except Exception as e:
+            raise e
+            print('comment could not be updated')
        # print(type(r))
        # print(r)
-        if score > r:
+        if score > reply_in_db:
             print(('updating {} reply based on score').format(comment_id))
             query = """UPDATE replies SET comment_id = '{}', parent_id = '{}', link_id = '{}', comment = '{}', subreddit = '{}', utc = '{}', score = '{}' WHERE comment_id = '{}'""".format(
                 comment_id, parent_id, link_id, comment, subreddit, utc, score, comment_id)
@@ -83,8 +97,8 @@ def update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
 
 
 def update_score(reply_score, score):
-    reply_score = int(reply_score, 10)
-    score = int(score, 10)
+    reply_score = int(reply_score)
+    score = int(score)
 
     if score > reply_score:
             print(('updating {} reply based on score').format(comment_id))
@@ -157,6 +171,8 @@ ADD METHODS
     CASE CONVERSIONS
     REMOVAL OF STOP WORDS
 
+    EVENTUALLY REPLACE ALL " WITH '
+
     IMPLEMENT THE NLTK LIBRARY
 
 
@@ -188,57 +204,73 @@ if __name__ == '__main__':
 
     NOTES
         COMMENTS LOAD INTO DB WHEN FILES ARE NOT FILTERED THROUGH AND THE CONNECTION IS CLOSED AT THE END
-        
+
     '''
     path_name = "../data/"
+    cwd = os.getcwd()
+    files = os.listdir(cwd)
+    print("Files in %r: %s" % (cwd, files))
+    data  = os.path.abspath("../data/")
 
-        
-    with open("../data/2010-03", buffering=1000) as f:
-        create_table()
-        for row in f:
-            row = json.loads(row)
-            row_counter += 1
-            
-            #print(row)
-            comment_id = row['name']
-            #print(comment_id)
-            parent_id = row['parent_id']
-            #print(parent_id)
-            link_id = row['link_id']
-            #print(link_id)
-            comment = format_data(row['body'])
-            #print(comment)
-            utc = row['created_utc']
-            #print(utc)
-            score = int(row['score'])
 
-            #print('score type initiated: ', type(score))
-            #print(score)
-            subreddit = filter_subreddit(row['subreddit'])
+for file in os.listdir(data):
+        filename = os.fsdecode(file)
+        try:
+            #line = db.replace('\n', '')
+            #print(line)
+            with open(data+'/'+filename, buffering=1000) as f:
+                #print(data+line)
+                create_table()
+                for row in f:
+                    
+                    row = json.loads(row)
+                    row_counter += 1
+                    
+                    #print(row)
+                    comment_id = row['name']
+                    #print(comment_id)
+                    parent_id = row['parent_id']
+                    #print(parent_id)
+                    link_id = row['link_id']
+                    #print(link_id)
+                    comment = format_data(row['body'])
+                    #print(comment)
+                    utc = row['created_utc']
+                    #print(utc)
+                    score = int(row['score'])
 
-            if score >= 10 and (subreddit is not None) and (comment is not None):
-                
+                    #print('score type initiated: ', type(score))
+                    #print(score)
+                    subreddit = filter_subreddit(row['subreddit'])
 
-                    #print(subreddit)
-                try:
-                    check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-                    has_parent_comment = find_parent(parent_id)
-                    if has_parent_comment:
+                    if score >= 10 and (subreddit is not None) and (comment is not None):
+                        
 
-                        '''
-                        TODO:
+                            #print(subreddit)
+                        try:
+                            check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+                            has_parent_comment = find_parent(parent_id)
+                            if has_parent_comment:
 
-                        Fix update/replace comment. Currently adds all replies to DB, does not replace/upate any 
+                                '''
+                                TODO:
 
-                        COULD BE ISSUE WITH CURRENT REPLY SCORE
-                        WHAT HAPPENS IF SCORES ARE IDENTIAL
-                        ISSUE WITH DB?
-                        '''
-                        update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
-                        #print('reply exists, updating if needed')
-                except Exception as e:
-                    print(str(e))
+                                Fix update/replace comment. Currently adds all replies to DB, does not replace/upate any 
 
-        close_connection()
+                                COULD BE ISSUE WITH CURRENT REPLY SCORE
+                                WHAT HAPPENS IF SCORES ARE IDENTIAL
+                                ISSUE WITH DB?
+                                '''
+                                update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
+                                #print('reply exists, updating if needed')
+                        except Exception as e:
+                            print(str(e))
+
+
+
+        except Exception as e:
+            raise e
+            print('Filelist.txt did not have any files to go through')
+            close_connection()
 
 
