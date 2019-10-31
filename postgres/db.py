@@ -25,13 +25,20 @@ def format_data(data):
                             if data is not '':
                                 if "[deleted]" not in data:
                                     if 'http://' not in data:
-                                        if '\n' or '\r' in data:
-                                            if "'" in data:
-                                                data = data.replace("'", '"')
-                                                data = data.replace("\n", " NEWLINE ")
-                                                data = data.replace("\r", " NEWLINE ")
-                                                data = re.sub("\s\s+", " ", data)
-                                                return data
+                                        if '\n' or '\r' or "'" in data:
+                                            #need to replace once added to db
+                                            data = data.replace("'", '"')
+                                            #special characters
+                                            pattern = r'[^a-zA-Z0-9\s]'
+                                            data =re.sub(pattern,'',data)
+                                            #new lines
+                                            data = data.replace("\n", " NEWLINE ")
+                                            #new lines
+                                            data = data.replace("\r", " NEWLINE ")
+                                            #excessive spacing
+                                            data = re.sub("\s\s+", " ", data)
+
+                                            return data
 
 
 def deleted(data):
