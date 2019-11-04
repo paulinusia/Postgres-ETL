@@ -14,12 +14,12 @@ c = con.cursor()
 
 def create_table():
     c.execute('CREATE TABLE IF NOT EXISTS initial_comment(comment_id TEXT PRIMARY KEY, parent_id TEXT, link_id TEXT, comment TEXT, subreddit TEXT, utc INT, score INT)')
-    c.execute('CREATE TABLE IF NOT EXISTS replies(comment_id TEXT UNIQUE, parent_id TEXT FOREIGN KEY, link_id TEXT, comment TEXT, subreddit TEXT, utc INT, score INT)')
+    c.execute('CREATE TABLE IF NOT EXISTS replies(comment_id TEXT UNIQUE, parent_id TEXT, link_id TEXT, comment TEXT, subreddit TEXT, utc INT, score INT)')
     con.commit()
 
 def format_data(data):
     if not deleted(data):
-        if len(data) > 15 or len(data.split(' ')) < 200:
+        if len(data) > 15 or len(data.split(' ')) < 150:
             if "[removed]" not in data:
                 if data is not '':
                     if "[deleted]" not in data:
@@ -34,28 +34,27 @@ def format_data(data):
                                 data = data.lower()
                                 #new lines
                                 data = data.replace(
-                                    "\n", " NEWLINE ")
+                                    "\n", "  ")
                                 #new lines
                                 data = data.replace(
-                                    "\r", " NEWLINE ")
+                                    "\r", "  ")
+                                #&gt
+                                data = data.replace(" gt ", "")
                                 #excessive spacing
                                 data = re.sub("\s\s+", " ", data)
-                                
-
                                 #filter data
                                 with open('./filter_lists/redacted.txt', buffering=1000) as f:
                                     for row in f:
                                         word = row.replace('\n', '')
+                                
                                         if word in data:
-                                            data.replace(word, 'REDACTED')
-                                            print(data)
+                                            data = data.replace(word, ' CENSORED ')
+                                            #print(data)
+                                            return data
 
-                                with open('./filter_lists/avoid_topics.txt') as f:
-                                    for row in f:
-                                        word = row.replace('\n', '')
-                                        if word in data:
-                                            data = None
-                                return data
+
+                                
+                         
 
 def deleted(data):
     if '[deleted]' in data:
@@ -63,8 +62,7 @@ def deleted(data):
 
 def filter_subreddit(subreddit):
     #print(row['subreddit'])
-    if ((row['subreddit'] == 'relationships') or (row['subreddit'] == 'Advice')
-        or (row['subreddit'] == 'relationshipadvice') or (row['subreddit'] == 'relationship_advice')
+    if ((row['subreddit'] == 'Advice')or (row['subreddit'] == 'CasualConversation')
         or (row['subreddit'] == 'askwomenadvice') or (row['subreddit'] == 'dating_advice')
         or (row['subreddit'] == 'AskMen')
         or (row['subreddit'] == 'AskWomen') or (row['subreddit'] == 'getdisciplined')
@@ -77,7 +75,19 @@ def filter_subreddit(subreddit):
         or (row['subreddit'] == 'NoStupidQuestions')
         or (row['subreddit'] == 'TrollXSupport') or (row['subreddit'] == 'breakingmom')
         or (row['subreddit'] == 'CatFacts') or (row['subreddit'] == 'thebestoflegaladvice') 
-        or (row['subreddit'] == 'getmotivated')):
+        or (row['subreddit'] == 'getmotivated') or (row['subreddit'] == 'wholesome')
+        or (row['subreddit'] == 'unexpected') or (row['subreddit'] == 'wholesomeneighbors')
+        or (row['subreddit'] == 'aww') or (row['subreddit'] == 'awweducational')
+        or (row['subreddit'] == 'unexpectedlywholesome') or (row['subreddit'] == 'mademesmile')
+        or (row['subreddit'] == 'eyebleach') or (row['subreddit'] == 'productivity') 
+        or (row['subreddit'] == 'lifeprotips') or (row['subreddit'] == 'AdviceAnimals') 
+        or (row['subreddit'] == 'getStudying') or (row['subreddit'] == 'Gardening') 
+        or (row['subreddit'] == 'cats') or (row['subreddit'] == 'NonZeroDay') 
+        or (row['subreddit'] == 'getmotivated') or (row['subreddit'] == 'ZenHabits') 
+        or (row['subreddit'] == 'Meditation') or (row['subreddit'] == 'randomactsofkindness')
+        or (row['subreddit'] == 'UpliftingNews') or (row['subreddit'] == 'HumansBeingBros')
+        or (row['subreddit'] == 'startledcats') or (row['subreddit'] == 'adorableart') 
+        or (row['subreddit'] == 'contagiouslaughter') or (row['subreddit'] == 'FeelsLikeTheFirstTime')):
         return subreddit
     else:
         return None
@@ -235,8 +245,9 @@ for file in os.listdir(data):
                     #print('score type initiated: ', type(score))
                     #print(score)
                     subreddit = filter_subreddit(row['subreddit'])
+                    #print(subreddit)
                     #subreddit = (row['subreddit'])
-                    if score >= 10 and (subreddit is not None) and (comment is not None):
+                    if score >= 8 and (subreddit is not None) and (comment is not None):
                             print(subreddit)
                             try:
                                 check_if_parent(
