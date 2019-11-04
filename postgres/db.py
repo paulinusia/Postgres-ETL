@@ -6,7 +6,7 @@ import os
 
 #establish connection
 con = psycopg2.connect(
-    database='db2010',
+    database='nlp',
     password='password')
 
 c = con.cursor()
@@ -17,42 +17,49 @@ def create_table():
     c.execute('CREATE TABLE IF NOT EXISTS replies(comment_id TEXT UNIQUE, parent_id TEXT FOREIGN KEY, link_id TEXT, comment TEXT, subreddit TEXT, utc INT, score INT)')
     con.commit()
 
-
 def format_data(data):
     if not deleted(data):
-            if len(data) > 10 or len(data.split(' ')) < 200:
-                        if "[removed]" not in data:
-                            if data is not '':
-                                if "[deleted]" not in data:
-                                    if 'http://' not in data:
-                                        if '\n' or '\r' or "'" in data:
-                                            #need to replace once added to db
-                                            data = data.replace("'", '"')
-                                            #special characters
-                                            pattern = r'[^a-zA-Z0-9\s]'
-                                            data = re.sub(pattern, '', data)
-                                            #new lines
-                                            data = data.replace(
-                                                "\n", " NEWLINE ")
-                                            #new lines
-                                            data = data.replace(
-                                                "\r", " NEWLINE ")
-                                            #excessive spacing
-                                            data = re.sub("\s\s+", " ", data)
+        if len(data) > 15 or len(data.split(' ')) < 200:
+            if "[removed]" not in data:
+                if data is not '':
+                    if "[deleted]" not in data:
+                        if 'http://' not in data:
+                            if '\n' or '\r' or "'" in data:
+                                #need to replace once added to db
+                                data = data.replace("'", '"')
+                                #special characters
+                                pattern = r'[^a-zA-Z0-9\s]'
+                                data = re.sub(pattern, '', data)
+                                #lowercase
+                                data = data.lower()
+                                #new lines
+                                data = data.replace(
+                                    "\n", " NEWLINE ")
+                                #new lines
+                                data = data.replace(
+                                    "\r", " NEWLINE ")
+                                #excessive spacing
+                                data = re.sub("\s\s+", " ", data)
+                                
 
-                                            with open('./filter_lists/redacted.txt', buffering=1000) as f:
-                                                for row in f:
-                                                    word = row.replace('\n', '')
-                                                    if word in data:
-                                                        word = "REDACTED"
-                                                        print(data)
-                                            return data
+                                #filter data
+                                with open('./filter_lists/redacted.txt', buffering=1000) as f:
+                                    for row in f:
+                                        word = row.replace('\n', '')
+                                        if word in data:
+                                            data.replace(word, 'REDACTED')
+                                            print(data)
 
+                                with open('./filter_lists/avoid_topics.txt') as f:
+                                    for row in f:
+                                        word = row.replace('\n', '')
+                                        if word in data:
+                                            data = None
+                                return data
 
 def deleted(data):
     if '[deleted]' in data:
         return True
-
 
 def filter_subreddit(subreddit):
     #print(row['subreddit'])
@@ -76,6 +83,7 @@ def filter_subreddit(subreddit):
         return None
 
 
+#db functions
 def check_if_updated(comment_id, parent_id, link_id, comment, subreddit, utc, score):
     query = "SELECT link_id FROM replies WHERE link_id = '{}' LIMIT 1".format(
         link_id)
@@ -91,7 +99,6 @@ def check_if_updated(comment_id, parent_id, link_id, comment, subreddit, utc, sc
             comment_id, parent_id, link_id, comment, subreddit, utc, score)
         c.execute(query3)
         con.commit()
-
 
 def update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score):
     #no linked comments
@@ -124,7 +131,6 @@ def update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
             raise e
             print('comment could not be updated')
 
-
 def check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score):
             if parent_id == link_id:
                 print(('{} is the root comment').format(comment_id))
@@ -135,14 +141,11 @@ def check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, sco
                 check_if_updated(comment_id, parent_id, link_id,
                                  comment, subreddit, utc, score)
 
-
-#helper functions
 def insert_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score):
     query2 = """INSERT INTO initial_comment(comment_id, parent_id, link_id, comment, subreddit, utc, score) VALUES ('{}','{}', '{}', '{}','{}',{},{});""".format(
         comment_id, parent_id, link_id, comment, subreddit, utc, score)
     c.execute(query2)
     con.commit()
-
 
 def find_parent(parent):
     query = "SELECT comment_id FROM initial_comment WHERE comment_id= '{}' LIMIT 1".format(
@@ -155,7 +158,6 @@ def find_parent(parent):
     else:
         return False
 
-
 def find_linked_comment(linkid):
     query = "SELECT comment_id FROM replies WHERE link_id = '{}' LIMIT 1".format(
         linkid)
@@ -166,15 +168,11 @@ def find_linked_comment(linkid):
     else:
         return False
 
-
 '''
 TODO:
 ADD METHODS
-    FILTER EXPLICIT LANGUAGE BY REPLACING CURSE WORDS WITH 'REDACTED'
-    FILTER EXPLICIT SUBJECTS... DISREGARD COMMENT COMPLETELY
-    REMOVE EXCESSIVE SPACING IN COMMENTS
-    REMOVE EXCESSIVE NEW LINE COMMENTS
-    REMOVE SPECIAL CHARACTERS
+    
+    
     CASE CONVERSIONS
     REMOVAL OF STOP WORDS
     EVENTUALLY REPLACE ALL " WITH '
@@ -239,7 +237,6 @@ for file in os.listdir(data):
                     subreddit = filter_subreddit(row['subreddit'])
                     #subreddit = (row['subreddit'])
                     if score >= 10 and (subreddit is not None) and (comment is not None):
-
                             print(subreddit)
                             try:
                                 check_if_parent(
