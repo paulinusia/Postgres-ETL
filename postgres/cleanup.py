@@ -5,7 +5,7 @@ import os
 import pandas as pd
 
 con = psycopg2.connect(
-    database='nlp',
+    database='nlp_db',
     password='password')
 
 c = con.cursor()

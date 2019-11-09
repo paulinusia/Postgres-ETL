@@ -6,7 +6,7 @@ import os
 
 #establish connection
 con = psycopg2.connect(
-    database='nlp',
+    database='nlp_db',
     password='password')
 
 c = con.cursor()
@@ -34,10 +34,10 @@ def format_data(data):
                                 data = data.lower()
                                 #new lines
                                 data = data.replace(
-                                    "\n", "  ")
+                                    "\n", "...")
                                 #new lines
                                 data = data.replace(
-                                    "\r", "  ")
+                                    "\r", "...")
                                 #&gt
                                 data = data.replace(" gt ", "")
                                 #excessive spacing
@@ -48,7 +48,7 @@ def format_data(data):
                                         word = row.replace('\n', '')
                                 
                                         if word in data:
-                                            data = data.replace(word, ' CENSORED ')
+                                            data = data.replace(word, ' *censored* ')
                                             #print(data)
                                             return data
 
@@ -62,7 +62,8 @@ def deleted(data):
 
 def filter_subreddit(subreddit):
     #print(row['subreddit'])
-    if ((row['subreddit'] == 'Advice')or (row['subreddit'] == 'CasualConversation')
+    if ((row['subreddit'] == 'relationship_adivce')or (row['subreddit'] == 'relationships')
+        or (row['subreddit'] == 'Advice') or (row['subreddit'] == 'CasualConversation')
         or (row['subreddit'] == 'askwomenadvice') or (row['subreddit'] == 'dating_advice')
         or (row['subreddit'] == 'AskMen')
         or (row['subreddit'] == 'AskWomen') or (row['subreddit'] == 'getdisciplined')
@@ -87,7 +88,57 @@ def filter_subreddit(subreddit):
         or (row['subreddit'] == 'Meditation') or (row['subreddit'] == 'randomactsofkindness')
         or (row['subreddit'] == 'UpliftingNews') or (row['subreddit'] == 'HumansBeingBros')
         or (row['subreddit'] == 'startledcats') or (row['subreddit'] == 'adorableart') 
-        or (row['subreddit'] == 'contagiouslaughter') or (row['subreddit'] == 'FeelsLikeTheFirstTime')):
+        or (row['subreddit'] == 'contagiouslaughter') or (row['subreddit'] == 'FeelsLikeTheFirstTime')
+        or (row['subreddit'] == 'accidentalComedy')or (row['subreddit'] == 'ActLikeYouBelong')
+        or (row['subreddit'] == 'AnimalsBeingDerps')or (row['subreddit'] == 'animalsdoingstuff')
+        or (row['subreddit'] == 'Animals')or (row['subreddit'] == 'AskAcademia')
+        or (row['subreddit'] == 'AskAnAmerican')or (row['subreddit'] == 'AskAnthropology')
+        or (row['subreddit'] == 'AskCulinary')or (row['subreddit'] == 'AskDocs')
+        or (row['subreddit'] == 'AskHistorians')or (row['subreddit'] == 'askgaybros')
+        or (row['subreddit'] == 'askphilosophy')or (row['subreddit'] == 'AskReddit')
+        or (row['subreddit'] == 'awesome')or (row['subreddit'] == 'babybigcatgifs')
+        or (row['subreddit'] == 'beauty')or (row['subreddit'] == 'bestof')
+        or (row['subreddit'] == 'bestoflegaladvice')or (row['subreddit'] == 'legaladvice')
+        or (row['subreddit'] == 'blackcats')or (row['subreddit'] == 'dadjokes')
+        or (row['subreddit'] == 'daddit')or (row['subreddit'] == 'dadrelfexes')
+        or (row['subreddit'] == 'damnthatsinteresting')or (row['subreddit'] == 'dankchristianmemes')
+        or (row['subreddit'] == 'dankmemes')or (row['subreddit'] == 'dating')
+        or (row['subreddit'] == 'dating_advice')or (row['subreddit'] == 'datingoverthirty')
+        or (row['subreddit'] == 'IAmA')or (row['subreddit'] == 'doggos')or (row['subreddit'] == 'dogtraining')
+        or (row['subreddit'] == 'dontflinch')or (row['subreddit'] == 'femalefashionadvice')
+        or (row['subreddit'] == 'Feminism')or (row['subreddit'] == 'fancyfollicles')
+        or (row['subreddit'] == 'FellowKids')or (row['subreddit'] == 'financialindependence')
+        or (row['subreddit'] == 'findapath')or (row['subreddit'] == 'FinancialPlanning')
+        or (row['subreddit'] == 'fitmeals')or (row['subreddit'] == 'Fitness')
+        or (row['subreddit'] == 'ForeverAloneDating')or (row['subreddit'] == 'Frugal')
+        or (row['subreddit'] == 'FrugalFemaleFashion')or (row['subreddit'] == 'gardening')
+        or (row['subreddit'] == 'GetStudying')or (row['subreddit'] == 'happy')
+        or (row['subreddit'] == 'happycowgifs')or (row['subreddit'] == 'happycrowds')
+        or (row['subreddit'] == 'Heavymind')or (row['subreddit'] == 'hiphopheads')
+        or (row['subreddit'] == 'history')or (row['subreddit'] == 'explainlikeimfive')
+        or (row['subreddit'] == 'holdmycatnip')or (row['subreddit'] == 'HomeworkHelp')
+        or (row['subreddit'] == 'howto')or (row['subreddit'] == 'humblebrag')
+        or (row['subreddit'] == 'humor')or (row['subreddit'] == 'IndoorGarden')
+        or (row['subreddit'] == 'JusticeServed')or (row['subreddit'] == 'nature')
+        or (row['subreddit'] == 'NegativeWithGold')or (row['subreddit'] == 'nottheonion')
+        or (row['subreddit'] == 'OkCupid')or (row['subreddit'] == 'offmychest')
+        or (row['subreddit'] == 'offbeat')or (row['subreddit'] == 'OldSchoolCool')
+        or (row['subreddit'] == 'needadvice')or (row['subreddit'] == 'Needafriend')
+        or (row['subreddit'] == 'recipes')or (row['subreddit'] == 'raining')
+        or (row['subreddit'] == 'puns')or (row['subreddit'] == 'pugs')
+        or (row['subreddit'] == 'askscience')or (row['subreddit'] == 'stopdrinking')
+        or (row['subreddit'] == 'stopsmoking')or (row['subreddit'] == 'SuicideWatch')
+        or (row['subreddit'] == 'TooAfraidToAsk')or (row['subreddit'] == 'todayileanted')
+        or (row['subreddit'] == 'TrueAskReddit')or (row['subreddit'] == 'whatcouldgoright')
+        or (row['subreddit'] == 'wholesomegrrentext')or (row['subreddit'] == 'WholesomeComics')
+        or (row['subreddit'] == 'WritingPrompts')or (row['subreddit'] == 'yesyesyesyesno')or (row['subreddit'] == 'relationships')
+        or (row['subreddit'] == 'confession')or (row['subreddit'] == 'relationship_advice')or (row['subreddit'] == 'dating_advice')or (row['subreddit'] == 'LongDistance')
+        or (row['subreddit'] == 'ForeverAlone')or (row['subreddit'] == 'actuallesbians')or (row['subreddit'] == 'Showerthoughts')or (row['subreddit'] == 'MGTOW')or (row['subreddit'] == 'dating')or (row['subreddit'] == 'BreakUps')or (row['subreddit'] == 'confessions')or (row['subreddit'] == 'niceguys')
+        or (row['subreddit'] == 'teenagers')or (row['subreddit'] == 'raisedbynarcissists')or (row['subreddit'] == 'funny')or (row['subreddit'] == 'LGBTeens')or (row['subreddit'] == 'unpopularopinion')or (row['subreddit'] == 'lgbt')or (row['subreddit'] == 'childfree')or (row['subreddit'] == 'science')
+        or (row['subreddit'] == 'JUSTNOMIL')or (row['subreddit'] == 'asexuality')or (row['subreddit'] == 'asktransgender')or (row['subreddit'] == 'casualiama')or (row['subreddit'] == 'Jokes')or (row['subreddit'] == 'psychology')
+        or (row['subreddit'] == 'socialskills')or (row['subreddit'] == 'ExNoContact')or (row['subreddit'] == 'Parenting')or (row['subreddit'] == 'memes')
+        or (row['subreddit'] == 'AskWomenOver30')or (row['subreddit'] == 'NoStupidQuestions')or (row['subreddit'] == 'changemyview')or (row['subreddit'] == 'survivinginfidelity')or (row['subreddit'] == 'bestof')or (row['subreddit'] == 'tipofmytongue')
+        or (row['subreddit'] == 'wowthanksimcured')):
         return subreddit
     else:
         return None
@@ -104,7 +155,7 @@ def check_if_updated(comment_id, parent_id, link_id, comment, subreddit, utc, sc
         update_reply(comment_id, parent_id, link_id,
                      comment, subreddit, utc, score)
     else:
-        print(('inserting {} into replies').format(comment_id))
+        #print(('inserting {} into replies').format(comment_id))
         query3 = """INSERT INTO replies(comment_id, parent_id, link_id, comment, subreddit, utc, score) VALUES ('{}','{}', '{}', '{}','{}',{},{});""".format(
             comment_id, parent_id, link_id, comment, subreddit, utc, score)
         c.execute(query3)
@@ -117,10 +168,10 @@ def update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
 
     c.execute(query)
     result = c.fetchone()
-    print(result)
+    #print(result)
 
     if result != None:
-        print(('{} has an initial reply already').format(comment_id))
+        #print(('{} has an initial reply already').format(comment_id))
         try:
             reply_score = "SELECT score FROM replies WHERE link_id = '{}' LIMIT 1 ".format(
                 link_id)
@@ -130,20 +181,20 @@ def update_reply(comment_id, parent_id, link_id, comment, subreddit, utc, score)
             reply_in_db = int(reply_in_db[0])
 
             if score > reply_in_db:
-                print(('updating {} reply based on score').format(comment_id))
+               # print(('updating {} reply based on score').format(comment_id))
                 query = """UPDATE replies SET comment_id = '{}', parent_id = '{}', link_id = '{}', comment = '{}', subreddit = '{}', utc = '{}', score = '{}' WHERE comment_id = '{}'""".format(
                     comment_id, parent_id, link_id, comment, subreddit, utc, score, comment_id)
                 c.execute(query)
                 con.commit()
-                print('updated successfully')
+               # print('updated successfully')
 
         except Exception as e:
             raise e
-            print('comment could not be updated')
+           # print('comment could not be updated')
 
 def check_if_parent(comment_id, parent_id, link_id, comment, subreddit, utc, score):
             if parent_id == link_id:
-                print(('{} is the root comment').format(comment_id))
+               #print(('{} is the root comment').format(comment_id))
 
                 insert_parent(comment_id, parent_id, link_id,
                               comment, subreddit, utc, score)
@@ -178,41 +229,21 @@ def find_linked_comment(linkid):
     else:
         return False
 
-'''
-TODO:
-ADD METHODS
-    
-    
-    CASE CONVERSIONS
-    REMOVAL OF STOP WORDS
-    EVENTUALLY REPLACE ALL " WITH '
-    IMPLEMENT THE NLTK LIBRARY
-'''
 
 
 def close_connection():
     con.close()
 
 
-'''
-TODO:
-ADD TO BLACKBOX LOCATION
-FIX FILE STRUCTURE
-'''
+
 if __name__ == '__main__':
     row_counter = 0
 
-    '''
-    TODO:
-    FILTER THROUGH FILES/AUTOMATICALLY JUMP FROM FILE TO FILE
-    AUTOMATICALLY SWITCH DATABASES ONCE FILTERED THROUGH THE FILES... IS THIS AN OPTION
-    NOTES
-        COMMENTS LOAD INTO DB WHEN FILES ARE NOT FILTERED THROUGH AND THE CONNECTION IS CLOSED AT THE END
-    '''
+   
     path_name = "../data/"
     cwd = os.getcwd()
     files = os.listdir(cwd)
-    print("Files in %r: %s" % (cwd, files))
+    #print("Files in %r: %s" % (cwd, files))
     data = os.path.abspath("../data/")
 
 
@@ -247,8 +278,8 @@ for file in os.listdir(data):
                     subreddit = filter_subreddit(row['subreddit'])
                     #print(subreddit)
                     #subreddit = (row['subreddit'])
-                    if score >= 8 and (subreddit is not None) and (comment is not None):
-                            print(subreddit)
+                    if score >= 10 and (subreddit is not None) and (comment is not None):
+                            #print(subreddit)
                             try:
                                 check_if_parent(
                                     comment_id, parent_id, link_id, comment, subreddit, utc, score)
