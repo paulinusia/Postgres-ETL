@@ -1,6 +1,7 @@
 **/data/
 **/seq2seq/
 requirements.txt
+**postgres/filter_lists
 
 
 

@@ -3,6 +3,7 @@ import json
 import re
 import os
 import pandas as pd
+import numpy as np
 
 con = psycopg2.connect(
     database='nlp_db',
@@ -35,31 +36,43 @@ def write_out(filename, dataframe_column, df):
                 for content in df[dataframe_column].values:
                     f.write(str(content)+'\n')
 
+#Retrieves cell locations for all strings/substrings
+def find_df_value(dataframe, phrase):
+    idx = dataframe.apply(lambda x: x.str.contains(phrase)).fillna(False)
+    vals = idx[idx == True].stack().index.tolist()
+    return vals
 
-def find_df_value(string):
-    return
-
+#finds ID in given column
+def find_id(df, column, id):
+    col = df[column]
+    occr = []
+    val = col[col == id].index
+    for x in val:
+        occr.append(x, column)
+    return occr
 
 #returns one sorted dataframe
 def sort_dataframes(comment, replies):
-    '''
-    PSEUDO CODE:
-    for row in comment, get column 'comment_id'
+    df = pd.DataFrame(columns=['comment', 'reply'])
+    for x in comment['comment_id']:
+        occr = find_id(replies, 'parent_id', x)
+        print(replies[occr[0]])
+        #get row for reply 
+        reply_comment = replies[occr[0]]
+        reply_comment_val = reply_comment['comment']
+        #get index value for row
+        idx =  comment.loc[comment['comment_id'] == x].index[0]
+        #get row
+        row = comment.iloc[idx]
+        #get comment
+        initial_comment = row['comment']
+        df = df.append({'comment': initial_comment, 'reply': reply_comment_val}, ignore_index=True)
+        df = re_censor(df)
+    print(df)
+    return df
 
-         find_dataframe_value(comment_id) in column 'parent_id'
-            get row(print row)
 
-    new df:
-    headers = comment, reply
-    df. add comment [column ]
-    write_out(df combined)
-    '''
-
-
-def read_csv(csv):
-    return
-
-def re_censor(bad_words_file, DF):
+def re_censor(df):
     '''
     FIND BAD WORDS LOCATION WITH FIND DF VALUES
 
@@ -72,10 +85,18 @@ def re_censor(bad_words_file, DF):
             if df[row][column] contains x
             df.val.replace({x:'*censored*'}, regex=True)
 
-    
+    '''
+    with open('./filter_lists/redacted.txt', buffering=1000) as f:
+        for row in f:
+            occr = find_df_value(df, row)
+            for x in occr:
+                if  row in df[occr[0]]['comment']:
+                    df = df[occr[0]]['comment'].replace({x: '*censored*'}, regex=True)
+                if row in df[occr[0]]['reply']:
+                    df = df[occr[0]]['reply'].replace({x: '*censored*'}, regex=True)
+    return df
     
 
-    '''
 
 #-----------------------------------------------------------------------------------------------------
 
@@ -94,5 +115,13 @@ write_out('./output_files/replies_unsorted.csv', 'comment', replies)
 
 print(comment.head())
 print(replies.head())
+
+sorted_df = sort_dataframes(comment, replies)
+
+sorted_df.to_csv('./output_files/master.csv', encoding='utf-8', index=False)
+
+write_out('./output_files/comments.csv', 'comment', comment)
+write_out('./output_files/replies.csv', 'comment', replies)
+
 
 
