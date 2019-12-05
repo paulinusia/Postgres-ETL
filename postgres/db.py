@@ -19,7 +19,7 @@ def create_table():
 
 def format_data(data):
     if not deleted(data):
-        if len(data) > 15 or len(data.split(' ')) < 150:
+        if len(data) > 5 or len(data.split(' ')) < 50:
             if "[removed]" not in data:
                 if data is not '':
                     if "[deleted]" not in data:

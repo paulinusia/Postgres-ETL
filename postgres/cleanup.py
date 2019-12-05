@@ -48,7 +48,7 @@ def remove_possible_duplicates():
     df = df.iloc[:, 1].tolist()
 
     for parent_id in df:
-
+        #print(parent_id)
         query = "SELECT comment_id from initial_comment where comment_id = '{}'LIMIT 1".format(parent_id)
         c.execute(query)
         result = c.fetchone()
