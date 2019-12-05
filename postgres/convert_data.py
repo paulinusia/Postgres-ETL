@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 con = psycopg2.connect(
-    database='nlp_db',
+    database='nlp_backup',
     password='password')
     
 c = con.cursor()
@@ -48,17 +48,25 @@ def find_id(df, column, id):
     occr = []
     val = col[col == id].index
     for x in val:
-        occr.append(x, column)
+        location = [x, column]
+        occr.append(location)
     return occr
 
 #returns one sorted dataframe
 def sort_dataframes(comment, replies):
     df = pd.DataFrame(columns=['comment', 'reply'])
     for x in comment['comment_id']:
+        print(x)
+        '''
         occr = find_id(replies, 'parent_id', x)
-        print(replies[occr[0]])
+        if
+        print('occr 0...',occr[0][0])'''
+
+        occr = find_df_value(comment, x)
+        print(occr)
+
         #get row for reply 
-        reply_comment = replies[occr[0]]
+        reply_comment = replies.iloc[occr[0][0]]
         reply_comment_val = reply_comment['comment']
         #get index value for row
         idx =  comment.loc[comment['comment_id'] == x].index[0]
@@ -109,13 +117,17 @@ replies = pull_and_convert_replies()
 
 
 #WRITE DATAFRAMES OUT TO FILE BEFORE PROCEEDING WITH SEARCH FUNCTION
-write_out('./output_files/comments_unsorted.csv', 'comment', comment)
-write_out('./output_files/replies_unsorted.csv', 'comment', replies)
+write_out('../output_files/comments_unsorted.csv', 'comment', comment)
+write_out('../output_files/replies_unsorted.csv', 'comment', replies)
 
+
+comment = comment.drop('utc', axis=1)
+comment = comment.drop('score', axis=1)
+replies = replies.drop('utc', axis=1)
+replies = replies.drop('score', axis=1)
 
 print(comment.head())
 print(replies.head())
-
 sorted_df = sort_dataframes(comment, replies)
 
 sorted_df.to_csv('./output_files/master.csv', encoding='utf-8', index=False)
