@@ -18,8 +18,12 @@ def create_table():
     con.commit()
 
 def format_data(data):
-    if not deleted(data):
-        if len(data) > 5 or len(data.split(' ')) < 50:
+    data = data.lower()
+    data = data.replace("\n", "...")
+    data = data.replace("\r", "...")
+    data = data.replace(" gt ", "")
+    if data.str.contains('deleted') == False:
+        if len(data) > 5 or len(data.split('')) < 25:
             if "[removed]" not in data:
                 if data is not '':
                     if "[deleted]" not in data:
@@ -30,35 +34,17 @@ def format_data(data):
                                 #special characters
                                 pattern = r'[^a-zA-Z0-9\s]'
                                 data = re.sub(pattern, '', data)
-                                #lowercase
-                                data = data.lower()
-                                #new lines
-                                data = data.replace(
-                                    "\n", "...")
-                                #new lines
-                                data = data.replace(
-                                    "\r", "...")
-                                #&gt
-                                data = data.replace(" gt ", "")
                                 #excessive spacing
                                 data = re.sub("\s\s+", " ", data)
                                 #filter data
                                 with open('./filter_lists/redacted.txt', buffering=1000) as f:
                                     for row in f:
                                         word = row.replace('\n', '')
-                                
                                         if word in data:
                                             data = data.replace(word, ' *censored* ')
                                             #print(data)
                                             return data
 
-
-                                
-                         
-
-def deleted(data):
-    if '[deleted]' in data:
-        return True
 
 def filter_subreddit(subreddit):
     #print(row['subreddit'])

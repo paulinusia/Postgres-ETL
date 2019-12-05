@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 con = psycopg2.connect(
-    database='nlp_backup',
+    database='nlp_db',
     password='password')
     
 c = con.cursor()
@@ -75,13 +75,14 @@ def sort_dataframes(comment, replies):
         #get comment
         initial_comment = row['comment']
         df = df.append({'comment': initial_comment, 'reply': reply_comment_val}, ignore_index=True)
-        df = re_censor(df)
+        #df = re_censor(df)
     print(df)
     return df
 
 
+'''
 def re_censor(df):
-    '''
+    
     FIND BAD WORDS LOCATION WITH FIND DF VALUES
 
     TAKE LIST OF BAD WORD LOCATIONS, FIND THE ROW, AND DF['COMMENT]
@@ -93,7 +94,7 @@ def re_censor(df):
             if df[row][column] contains x
             df.val.replace({x:'*censored*'}, regex=True)
 
-    '''
+ 
     with open('./filter_lists/redacted.txt', buffering=1000) as f:
         for row in f:
             occr = find_df_value(df, row)
@@ -104,7 +105,7 @@ def re_censor(df):
                     df = df[occr[0]]['reply'].replace({x: '*censored*'}, regex=True)
     return df
     
-
+'''
 
 #-----------------------------------------------------------------------------------------------------
 
@@ -117,8 +118,8 @@ replies = pull_and_convert_replies()
 
 
 #WRITE DATAFRAMES OUT TO FILE BEFORE PROCEEDING WITH SEARCH FUNCTION
-write_out('../output_files/comments_unsorted.csv', 'comment', comment)
-write_out('../output_files/replies_unsorted.csv', 'comment', replies)
+#write_out('../output_files/comments_unsorted.csv', 'comment', comment)
+#write_out('../output_files/replies_unsorted.csv', 'comment', replies)
 
 
 comment = comment.drop('utc', axis=1)
@@ -130,10 +131,12 @@ print(comment.head())
 print(replies.head())
 sorted_df = sort_dataframes(comment, replies)
 
-sorted_df.to_csv('./output_files/master.csv', encoding='utf-8', index=False)
+write_out('../output_files/comments.csv', 'comment', comment)
+write_out('../output_files/replies.csv', 'comment', replies)
 
-write_out('./output_files/comments.csv', 'comment', comment)
-write_out('./output_files/replies.csv', 'comment', replies)
+
+sorted_df.to_csv('../output_files/master.csv', encoding='utf-8', index=False)
+
 
 
 
