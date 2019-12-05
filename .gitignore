@@ -2,6 +2,7 @@
 **/seq2seq/
 requirements.txt
 **postgres/filter_lists
+**/output_files/
 
 
 
