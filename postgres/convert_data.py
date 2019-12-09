@@ -66,12 +66,12 @@ def sort_dataframes(comment, replies):
         print(occr)
 
         #get row for reply 
-        reply_comment = replies.iloc[occr[0][0]]
+        reply_comment = replies.loc[occr[0][0]]
         reply_comment_val = reply_comment['comment']
         #get index value for row
         idx =  comment.loc[comment['comment_id'] == x].index[0]
         #get row
-        row = comment.iloc[idx]
+        row = comment.loc[idx]
         #get comment
         initial_comment = row['comment']
         df = df.append({'comment': initial_comment, 'reply': reply_comment_val}, ignore_index=True)
@@ -106,7 +106,17 @@ def re_censor(df):
     return df
     
 '''
+'''
+Create funct that will create a file called conversationData.txt
+in the format:
 
+
+Message:
+Response:
+Message:
+Response:
+
+'''
 #-----------------------------------------------------------------------------------------------------
 
 
